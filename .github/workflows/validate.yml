@@ -1,0 +1,25 @@
+name: Validate
+
+on:
+  pull_request:
+    paths:
+      - "entries/**"
+      - "scripts/**"
+      - ".github/workflows/validate.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate manifests
+        run: node scripts/validate.mjs
+      - name: Check registry.json is up to date
+        run: |
+          node scripts/build-registry.mjs
+          if [[ -n "$(git status --porcelain registry.json)" ]]; then
+            echo "registry.json is stale. It will be rebuilt automatically on merge, so this is just a heads-up."
+          fi

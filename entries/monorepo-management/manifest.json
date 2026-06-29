@@ -1,0 +1,19 @@
+{
+  "id": "monorepo-management",
+  "type": "skill",
+  "name": "Monorepo Management",
+  "description": "Patterns and workflows for working effectively inside a monorepo.",
+  "longDescription": "Guidance for navigating and changing code in a monorepo: workspace layout, scoped builds and tests, dependency boundaries, and release coordination. Downloaded from the upstream wshobson/agents repository at install time.",
+  "author": "wshobson",
+  "homepage": "https://github.com/wshobson/agents",
+  "tags": ["monorepo", "tooling", "workflow"],
+  "version": "1.0.0",
+  "source": {
+    "type": "github",
+    "repo": "wshobson/agents",
+    "ref": "main",
+    "path": "plugins/developer-essentials/skills/monorepo-management",
+    "isDirectory": true
+  },
+  "install": { "dirName": "monorepo-management" }
+}

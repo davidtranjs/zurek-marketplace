@@ -1,0 +1,25 @@
+{
+  "id": "context7",
+  "type": "mcp",
+  "name": "Context7",
+  "description": "Up-to-date code docs and examples for any library, pulled straight into context.",
+  "longDescription": "Context7 fetches current, version-specific documentation and code examples for thousands of libraries so your agent stops hallucinating outdated APIs. Runs locally via npx; no account required for basic use.",
+  "author": "Upstash",
+  "homepage": "https://github.com/upstash/context7",
+  "tags": ["docs", "reference", "context"],
+  "version": "1.0.0",
+  "license": "MIT",
+  "mcp": {
+    "transport": "stdio",
+    "command": "npx",
+    "args": ["-y", "@upstash/context7-mcp"],
+    "env": [
+      {
+        "key": "CONTEXT7_API_KEY",
+        "description": "Optional API key for higher rate limits (get one at context7.com).",
+        "required": false,
+        "secret": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "essentials-pack",
+  "type": "bundle",
+  "name": "Essentials Pack",
+  "description": "A starter set: the Context7 docs server plus a code-review agent.",
+  "longDescription": "Installs everything you need to get going: Context7 for up-to-date library docs, and the Code Reviewer agent for a quick second pair of eyes on your diffs. Each item can also be installed on its own.",
+  "author": "Zurek",
+  "homepage": "https://github.com/davidtranjs/zurek-marketplace",
+  "tags": ["starter", "bundle"],
+  "version": "1.0.0",
+  "items": [{ "id": "context7" }, { "id": "code-reviewer" }]
+}

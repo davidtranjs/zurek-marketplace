@@ -1,0 +1,9 @@
+{
+  "name": "zurek-marketplace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-registry.mjs",
+    "validate": "node scripts/validate.mjs"
+  }
+}
