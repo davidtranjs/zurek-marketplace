@@ -17,9 +17,7 @@ jobs:
           node-version: 20
       - name: Validate manifests
         run: node scripts/validate.mjs
-      - name: Check registry.json is up to date
-        run: |
-          node scripts/build-registry.mjs
-          if [[ -n "$(git status --porcelain registry.json)" ]]; then
-            echo "registry.json is stale. It will be rebuilt automatically on merge, so this is just a heads-up."
-          fi
+      - name: Build smoke test
+        # Output (public/) is generated on deploy, not committed, so there's
+        # nothing to diff — just confirm the build succeeds for this PR.
+        run: node scripts/build-registry.mjs

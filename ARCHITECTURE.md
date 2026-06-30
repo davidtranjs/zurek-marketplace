@@ -44,18 +44,20 @@ a searchable API for class 2.
 `node scripts/build-registry.mjs` validates every manifest, then emits:
 
 ```
-registry.json              LEGACY full dump. Committed. Deprecated — kept only so
-                           older clients keep working while they migrate.
-
 public/                    Build output (gitignored; published to Cloudflare Pages by CI).
 ├── meta.json              { version, generatedAt, count, indexHash }  — tiny, always fresh.
 ├── index.json             Slim list: list/search/filter fields + per-entry hash. No heavy detail.
+├── registry.json          LEGACY full dump, for older clients. Deprecated — being phased out.
 ├── detail/
 │   └── <id>.<hash>.json   Full per-entry detail. Content-addressed → cache forever.
 ├── entries/
 │   └── <id>/...           Vendored content files (downloaded at install time).
 └── _headers               Cloudflare cache rules (immutable detail vs revalidate).
 ```
+
+Nothing here is committed to git — it's all regenerated on every deploy. CI builds
+`public/` and pushes it straight to Cloudflare Pages; there is no bot commit back to
+`main` (that's what previously caused non-fast-forward push failures).
 
 ### Shapes
 
@@ -124,6 +126,7 @@ https://marketplace-data.zurek.app/meta.json
 https://marketplace-data.zurek.app/index.json
 https://marketplace-data.zurek.app/detail/<id>.<hash>.json
 https://marketplace-data.zurek.app/entries/<id>/<file>
+https://marketplace-data.zurek.app/registry.json          (legacy, deprecated)
 ```
 
 **Deploy** runs in `.github/workflows/build-registry.yml` via `cloudflare/wrangler-action`

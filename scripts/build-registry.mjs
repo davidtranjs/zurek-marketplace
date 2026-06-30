@@ -2,12 +2,13 @@
 // Run by CI on push to main and locally with `node scripts/build-registry.mjs`.
 // Validates first and refuses to build on error.
 //
-// Outputs:
+// All outputs go into public/ — a generated, gitignored static site published to
+// Cloudflare Pages. Nothing is committed back to the repo (no CI push to main).
+//
+// Outputs (all under public/):
 //   registry.json              — LEGACY full dump (every entry, full payload) for
-//                                 older clients. Committed to the repo. Deprecated:
-//                                 it grows linearly with the catalog and is the file
-//                                 we're moving clients off of.
-//   public/                    — static site published to Cloudflare Pages.
+//                                 older clients. Deprecated: it grows linearly with
+//                                 the catalog and is the file we're moving clients off of.
 //     meta.json                — tiny: { version, generatedAt, count, indexHash }.
 //                                 The only file a client must always re-fetch.
 //     index.json               — slim list (INDEX_FIELDS + hash) used to render the
@@ -84,15 +85,19 @@ function main() {
     })
     .sort((a, b) => a.entry.id.localeCompare(b.entry.id));
 
-  // --- Legacy: registry.json (committed, full dump) ----------------------
-  writeJson(join(ROOT, "registry.json"), {
+  // Start from a clean output dir, then write everything into public/.
+  rmSync(PUBLIC_DIR, { recursive: true, force: true });
+
+  // --- Legacy: registry.json (full dump) ---------------------------------
+  // Deployed alongside the split index (served at /registry.json) for older
+  // clients. NOT committed to git — it's a generated artifact like the rest.
+  writeJson(join(PUBLIC_DIR, "registry.json"), {
     version: 1,
     generatedAt,
     entries: fullEntries.map((e) => e.entry),
   });
 
   // --- New: split index + content-addressed detail into public/ ----------
-  rmSync(PUBLIC_DIR, { recursive: true, force: true });
 
   const index = [];
   for (const { folder, entry } of fullEntries) {
@@ -134,7 +139,7 @@ function main() {
   writeFileSync(join(PUBLIC_DIR, "_headers"), HEADERS);
 
   const n = index.length;
-  console.log(`✓ built registry.json + public/ (${n} entr${n === 1 ? "y" : "ies"}, indexHash ${indexHash})`);
+  console.log(`✓ built public/ (${n} entr${n === 1 ? "y" : "ies"}, indexHash ${indexHash})`);
 }
 
 main();
