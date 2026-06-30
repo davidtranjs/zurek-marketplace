@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-registry.mjs",
+    "build:curated": "ZUREK_NO_AGGREGATE=1 node scripts/build-registry.mjs",
+    "aggregate": "node scripts/aggregate.mjs",
     "validate": "node scripts/validate.mjs"
   }
 }

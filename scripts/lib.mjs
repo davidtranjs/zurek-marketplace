@@ -28,6 +28,11 @@ export const INDEX_FIELDS = [
   "version",
   "license",
   "homepage",
+  // Aggregation metadata: where the entry came from ("curated" | "mcp-registry"
+  // | "glama") and whether it's a non-installable reference pointer. In the
+  // index so clients can badge/filter by source without fetching detail.
+  "provenance",
+  "reference",
 ];
 
 /** Deterministic JSON: object keys sorted recursively, so the hash of equal

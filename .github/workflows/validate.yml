@@ -20,4 +20,7 @@ jobs:
       - name: Build smoke test
         # Output (public/) is generated on deploy, not committed, so there's
         # nothing to diff — just confirm the build succeeds for this PR.
-        run: node scripts/build-registry.mjs
+        # ZUREK_NO_AGGREGATE keeps PRs offline & deterministic: the upstream
+        # aggregation (Glama, official MCP Registry) runs only on deploy, not
+        # on every PR, so a flaky upstream can't fail an unrelated PR.
+        run: ZUREK_NO_AGGREGATE=1 node scripts/build-registry.mjs
