@@ -6,15 +6,12 @@ In Zurek: **+ → Browse Marketplace**, review what an entry does, pick which to
 
 ## How it works
 
-- Every entry lives in its own folder under [`entries/`](entries/) with a `manifest.json`.
-- A GitHub Action regenerates [`registry.json`](registry.json) — a single index — whenever entries change.
-- The Zurek app fetches `registry.json` from:
-
-  ```
-  https://raw.githubusercontent.com/davidtranjs/zurek-marketplace/main/registry.json
-  ```
-
+- Every entry lives in its own folder under [`entries/`](entries/) with a `manifest.json` — the source of truth.
+- A GitHub Action runs `scripts/build-registry.mjs` whenever entries change. It emits a **split index** designed to scale: a tiny `meta.json`, a slim `index.json` (just the fields the list/search needs), and one content-addressed `detail/<id>.<hash>.json` file fetched lazily on click. The client downloads the small index once and pulls heavy detail only for entries the user opens. The output is published to Cloudflare Pages at **`https://marketplace-data.zurek.app`** (e.g. [`/index.json`](https://marketplace-data.zurek.app/index.json)).
+- A legacy [`registry.json`](registry.json) (the full dump) is still generated for backward compatibility while clients migrate off it. It does not scale and is deprecated.
 - Skill/agent content is either **vendored** in the entry folder or **referenced** from an upstream GitHub repo; the app downloads it at install time. MCP servers carry their full config (command/args/env or URL) in the manifest, so you can review exactly what will run before installing.
+
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the output structure, the client fetch flow, and the Phase 2 searchable-API contract.
 
 ## Entry types
 

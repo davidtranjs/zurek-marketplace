@@ -15,12 +15,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history so per-entry `updatedAt` reflects the real last-touched
+          # commit, not the checkout time.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Rebuild registry.json
+      - name: Build registry.json + public/ index
         run: node scripts/build-registry.mjs
-      - name: Commit if changed
+      - name: Commit registry.json if changed
         run: |
           if [[ -n "$(git status --porcelain registry.json)" ]]; then
             git config user.name "github-actions[bot]"
@@ -31,3 +35,15 @@ jobs:
           else
             echo "registry.json already up to date"
           fi
+      # Publish the split index (public/) to Cloudflare Pages. public/ is
+      # gitignored and regenerated above. Requires two repo secrets:
+      #   CLOUDFLARE_API_TOKEN   — token with the "Cloudflare Pages: Edit" permission
+      #   CLOUDFLARE_ACCOUNT_ID  — your Cloudflare account id
+      # One-time: create the Pages project named "zurek-marketplace" (dashboard, or
+      # `wrangler pages project create zurek-marketplace`). See ARCHITECTURE.md → Serving.
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=zurek-marketplace --branch=main

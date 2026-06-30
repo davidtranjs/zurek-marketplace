@@ -5,12 +5,89 @@
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 
 export const ROOT = fileURLToPath(new URL("..", import.meta.url));
 export const ENTRIES_DIR = join(ROOT, "entries");
+export const PUBLIC_DIR = join(ROOT, "public");
 
 export const ENTRY_TYPES = ["mcp", "skill", "agent", "bundle"];
 const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
+
+// Fields the list/search/filter views need. Everything heavy or structural
+// (longDescription, mcp, source, install, items, files) is left out of the
+// index and fetched lazily from the per-entry detail file instead.
+export const INDEX_FIELDS = [
+  "id",
+  "type",
+  "name",
+  "description",
+  "author",
+  "tags",
+  "version",
+  "license",
+  "homepage",
+];
+
+/** Deterministic JSON: object keys sorted recursively, so the hash of equal
+ * content is stable across runs and machines. */
+export function stableStringify(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(",")}]`;
+  }
+  if (value && typeof value === "object") {
+    const keys = Object.keys(value).sort();
+    return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+/** Short content hash of any JSON-serializable value. Used as an immutable
+ * cache key for per-entry detail and to detect index changes. */
+export function contentHash(value) {
+  return createHash("sha256").update(stableStringify(value)).digest("hex").slice(0, 16);
+}
+
+/** Short hash of the *contents* of an entry's vendored files. Folded into the
+ * entry hash so editing a vendored file (without touching the manifest) still
+ * changes the hash — otherwise such edits would never invalidate client caches. */
+export function vendoredContentHash(folder, files) {
+  const h = createHash("sha256");
+  for (const rel of files) {
+    h.update(rel);
+    h.update("\0");
+    h.update(readFileSync(join(ENTRIES_DIR, folder, rel)));
+    h.update("\0");
+  }
+  return h.digest("hex").slice(0, 16);
+}
+
+/** ISO timestamp of the last commit touching an entry folder, or null if git
+ * history isn't available (e.g. a shallow checkout or a fresh untracked entry). */
+export function gitLastModified(folder) {
+  try {
+    const out = execFileSync(
+      "git",
+      ["log", "-1", "--format=%cI", "--", `entries/${folder}`],
+      { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    ).trim();
+    return out || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Projects a full entry down to the slim shape stored in index.json. */
+export function slimEntry(entry) {
+  const out = {};
+  for (const f of INDEX_FIELDS) {
+    if (entry[f] !== undefined) {
+      out[f] = entry[f];
+    }
+  }
+  return out;
+}
 
 /** Folder names under entries/, sorted. */
 export function listEntryDirs() {

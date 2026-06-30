@@ -1,2 +1,6 @@
 node_modules
 .DS_Store
+
+# Generated build output, published to a CDN by CI (see ARCHITECTURE.md).
+# registry.json (legacy full dump) is committed; the split index in public/ is not.
+public
